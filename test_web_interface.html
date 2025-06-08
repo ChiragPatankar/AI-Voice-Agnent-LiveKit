@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Agent Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .mode-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .test-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .test-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .test-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn.record {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .btn.record.recording {
+            background: linear-gradient(135deg, #ff3838 0%, #c23616 100%);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn.stop {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+
+        .result-box {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .result-box.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .result-box.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .audio-player {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .config-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .config-info strong {
+            color: #495057;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ AI Voice Agent Tester</h1>
+            <p>Test your STT, LLM, and TTS components individually</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Mode Selector -->
+            <div class="mode-selector">
+                <div class="mode-btn active" onclick="switchMode('stt')">🎤 Speech-to-Text</div>
+                <div class="mode-btn" onclick="switchMode('llm')">🧠 LLM Chat</div>
+                <div class="mode-btn" onclick="switchMode('tts')">🗣️ Text-to-Speech</div>
+            </div>
+
+            <!-- STT Testing Section -->
+            <div id="stt-section" class="test-section active">
+                <h2>🎤 Speech-to-Text Testing</h2>
+                <div class="config-info">
+                    <strong>Provider:</strong> Deepgram nova-2 model<br>
+                    <strong>Language:</strong> English<br>
+                    <strong>Features:</strong> Smart formatting, interim results
+                </div>
+                
+                <div class="input-group">
+                    <label>Deepgram API Key:</label>
+                    <input type="password" id="deepgram-key" placeholder="Enter your Deepgram API key">
+                </div>
+
+                <button class="btn record" id="record-btn" onclick="toggleRecording()">🎤 Start Recording</button>
+                <button class="btn stop" onclick="stopRecording()" style="display: none;" id="stop-btn">⏹️ Stop Recording</button>
+                
+                <div id="stt-status"></div>
+                <div id="stt-result" class="result-box"></div>
+
+                <div class="metrics" id="stt-metrics" style="display: none;">
+                    <div class="metric">
+                        <div class="metric-value" id="stt-latency">--</div>
+                        <div class="metric-label">Processing Time (ms)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="stt-confidence">--</div>
+                        <div class="metric-label">Confidence (%)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM Testing Section -->
+            <div id="llm-section" class="test-section">
+                <h2>🧠 LLM Chat Testing</h2>
+                <div class="config-info">
+                    <strong>Provider:</strong> Groq<br>
+                    <strong>Model:</strong> llama-3.1-8b-instant<br>
+                    <strong>Features:</strong> Fast inference, conversational AI
+                </div>
+
+                <div class="input-group">
+                    <label>Groq API Key:</label>
+                    <input type="password" id="groq-key" placeholder="Enter your Groq API key (starts with gsk_)">
+                </div>
+
+                <div class="input-group">
+                    <label>Your Message:</label>
+                    <textarea id="llm-input" placeholder="Type your message here...">Hello! Tell me a short joke.</textarea>
+                </div>
+
+                <button class="btn" onclick="testLLM()">💬 Send Message</button>
+                <button class="btn" onclick="clearLLMChat()">🗑️ Clear Chat</button>
+
+                <div id="llm-status"></div>
+                <div id="llm-result" class="result-box"></div>
+
+                <div class="metrics" id="llm-metrics" style="display: none;">
+                    <div class="metric">
+                        <div class="metric-value" id="llm-latency">--</div>
+                        <div class="metric-label">Response Time (ms)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="llm-tokens">--</div>
+                        <div class="metric-label">Tokens Generated</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TTS Testing Section -->
+            <div id="tts-section" class="test-section">
+                <h2>🗣️ Text-to-Speech Testing</h2>
+                <div class="config-info">
+                    <strong>Provider:</strong> Cartesia<br>
+                    <strong>Voice:</strong> sonic-english<br>
+                    <strong>Features:</strong> High-quality neural voice synthesis
+                </div>
+
+                <div class="input-group">
+                    <label>Cartesia API Key:</label>
+                    <input type="password" id="cartesia-key" placeholder="Enter your Cartesia API key">
+                </div>
+
+                <div class="input-group">
+                    <label>Text to Synthesize:</label>
+                    <textarea id="tts-input" placeholder="Enter text to convert to speech...">Hello! This is a test of the Cartesia text-to-speech system. How does it sound?</textarea>
+                </div>
+
+                <button class="btn" onclick="testTTS()">🎵 Generate Speech</button>
+                <button class="btn" onclick="playLastAudio()">▶️ Play Last Audio</button>
+
+                <div id="tts-status"></div>
+                <div id="tts-result" class="result-box"></div>
+                <audio id="tts-audio" controls class="audio-player" style="display: none;"></audio>
+
+                <div class="metrics" id="tts-metrics" style="display: none;">
+                    <div class="metric">
+                        <div class="metric-value" id="tts-latency">--</div>
+                        <div class="metric-label">Generation Time (ms)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="tts-duration">--</div>
+                        <div class="metric-label">Audio Duration (s)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let llmChat = [];
+
+        // Load API keys from localStorage
+        window.onload = function() {
+            document.getElementById('deepgram-key').value = localStorage.getItem('deepgram-key') || '';
+            document.getElementById('groq-key').value = localStorage.getItem('groq-key') || '';
+            document.getElementById('cartesia-key').value = localStorage.getItem('cartesia-key') || '';
+        };
+
+        // Save API keys to localStorage
+        function saveApiKeys() {
+            localStorage.setItem('deepgram-key', document.getElementById('deepgram-key').value);
+            localStorage.setItem('groq-key', document.getElementById('groq-key').value);
+            localStorage.setItem('cartesia-key', document.getElementById('cartesia-key').value);
+        }
+
+        // Switch between modes
+        function switchMode(mode) {
+            // Update active button
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide sections
+            document.querySelectorAll('.test-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`${mode}-section`).classList.add('active');
+
+            saveApiKeys();
+        }
+
+        // Show status message
+        function showStatus(elementId, message, type = 'info') {
+            const statusEl = document.getElementById(elementId);
+            statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // STT Functions
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await processSTT(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+
+                document.getElementById('record-btn').innerHTML = '🔴 Recording...';
+                document.getElementById('record-btn').classList.add('recording');
+                document.getElementById('stop-btn').style.display = 'inline-block';
+
+                showStatus('stt-status', '🎤 Recording audio... Speak now!', 'info');
+            } catch (error) {
+                showStatus('stt-status', `❌ Microphone access denied: ${error.message}`, 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+
+                document.getElementById('record-btn').innerHTML = '🎤 Start Recording';
+                document.getElementById('record-btn').classList.remove('recording');
+                document.getElementById('stop-btn').style.display = 'none';
+
+                showStatus('stt-status', '⏳ Processing audio...', 'info');
+            }
+        }
+
+        async function processSTT(audioBlob) {
+            const apiKey = document.getElementById('deepgram-key').value;
+            if (!apiKey) {
+                showStatus('stt-status', '❌ Please enter your Deepgram API key', 'error');
+                return;
+            }
+
+            const startTime = Date.now();
+
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+
+                const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Token ${apiKey}`,
+                    },
+                    body: formData
+                });
+
+                const endTime = Date.now();
+                const latency = endTime - startTime;
+
+                if (!response.ok) {
+                    throw new Error(`Deepgram API error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const transcript = result.results?.channels?.[0]?.alternatives?.[0]?.transcript || 'No speech detected';
+                const confidence = result.results?.channels?.[0]?.alternatives?.[0]?.confidence || 0;
+
+                document.getElementById('stt-result').innerHTML = `Transcript: "${transcript}"`;
+                document.getElementById('stt-result').className = 'result-box success';
+
+                // Show metrics
+                document.getElementById('stt-latency').textContent = latency;
+                document.getElementById('stt-confidence').textContent = Math.round(confidence * 100);
+                document.getElementById('stt-metrics').style.display = 'grid';
+
+                showStatus('stt-status', '✅ Speech-to-text completed successfully!', 'success');
+                saveApiKeys();
+
+            } catch (error) {
+                document.getElementById('stt-result').innerHTML = `Error: ${error.message}`;
+                document.getElementById('stt-result').className = 'result-box error';
+                showStatus('stt-status', `❌ STT Error: ${error.message}`, 'error');
+            }
+        }
+
+        // LLM Functions
+        async function testLLM() {
+            const apiKey = document.getElementById('groq-key').value;
+            const message = document.getElementById('llm-input').value;
+
+            if (!apiKey) {
+                showStatus('llm-status', '❌ Please enter your Groq API key', 'error');
+                return;
+            }
+
+            if (!message.trim()) {
+                showStatus('llm-status', '❌ Please enter a message', 'error');
+                return;
+            }
+
+            showStatus('llm-status', '🧠 Generating response...', 'info');
+
+            const startTime = Date.now();
+
+            try {
+                llmChat.push({ role: 'user', content: message });
+
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        messages: llmChat,
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                });
+
+                const endTime = Date.now();
+                const latency = endTime - startTime;
+
+                if (!response.ok) {
+                    throw new Error(`Groq API error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const aiResponse = result.choices[0].message.content;
+                const tokens = result.usage?.completion_tokens || 0;
+
+                llmChat.push({ role: 'assistant', content: aiResponse });
+
+                // Display chat
+                let chatDisplay = '';
+                llmChat.forEach(msg => {
+                    const role = msg.role === 'user' ? '👤 You' : '🤖 AI';
+                    chatDisplay += `${role}: ${msg.content}\n\n`;
+                });
+
+                document.getElementById('llm-result').innerHTML = chatDisplay;
+                document.getElementById('llm-result').className = 'result-box success';
+
+                // Show metrics
+                document.getElementById('llm-latency').textContent = latency;
+                document.getElementById('llm-tokens').textContent = tokens;
+                document.getElementById('llm-metrics').style.display = 'grid';
+
+                showStatus('llm-status', '✅ LLM response generated successfully!', 'success');
+                document.getElementById('llm-input').value = '';
+                saveApiKeys();
+
+            } catch (error) {
+                document.getElementById('llm-result').innerHTML = `Error: ${error.message}`;
+                document.getElementById('llm-result').className = 'result-box error';
+                showStatus('llm-status', `❌ LLM Error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLLMChat() {
+            llmChat = [];
+            document.getElementById('llm-result').innerHTML = '';
+            document.getElementById('llm-result').className = 'result-box';
+            showStatus('llm-status', 'Chat cleared', 'info');
+        }
+
+        // TTS Functions
+        async function testTTS() {
+            const apiKey = document.getElementById('cartesia-key').value;
+            const text = document.getElementById('tts-input').value;
+
+            if (!apiKey) {
+                showStatus('tts-status', '❌ Please enter your Cartesia API key', 'error');
+                return;
+            }
+
+            if (!text.trim()) {
+                showStatus('tts-status', '❌ Please enter text to synthesize', 'error');
+                return;
+            }
+
+            showStatus('tts-status', '🎵 Generating speech audio...', 'info');
+
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch('https://api.cartesia.ai/tts/bytes', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_id: 'sonic-english',
+                        transcript: text,
+                        voice: {
+                            mode: 'id',
+                            id: '79a125e8-cd45-4c13-8a67-188112f4dd22'
+                        },
+                        output_format: {
+                            container: 'wav',
+                            encoding: 'pcm_f32le',
+                            sample_rate: 22050
+                        }
+                    })
+                });
+
+                const endTime = Date.now();
+                const latency = endTime - startTime;
+
+                if (!response.ok) {
+                    throw new Error(`Cartesia API error: ${response.status}`);
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                const audioElement = document.getElementById('tts-audio');
+                audioElement.src = audioUrl;
+                audioElement.style.display = 'block';
+
+                // Calculate duration when audio loads
+                audioElement.onloadedmetadata = () => {
+                    const duration = Math.round(audioElement.duration * 10) / 10;
+                    document.getElementById('tts-duration').textContent = duration;
+                };
+
+                document.getElementById('tts-result').innerHTML = `✅ Audio generated successfully!\nText: "${text}"`;
+                document.getElementById('tts-result').className = 'result-box success';
+
+                // Show metrics
+                document.getElementById('tts-latency').textContent = latency;
+                document.getElementById('tts-metrics').style.display = 'grid';
+
+                showStatus('tts-status', '✅ Text-to-speech completed successfully!', 'success');
+                saveApiKeys();
+
+            } catch (error) {
+                document.getElementById('tts-result').innerHTML = `Error: ${error.message}`;
+                document.getElementById('tts-result').className = 'result-box error';
+                showStatus('tts-status', `❌ TTS Error: ${error.message}`, 'error');
+            }
+        }
+
+        function playLastAudio() {
+            const audioElement = document.getElementById('tts-audio');
+            if (audioElement.src) {
+                audioElement.play();
+            } else {
+                showStatus('tts-status', '❌ No audio to play. Generate speech first.', 'error');
+            }
+        }
+
+        // Enter key handlers
+        document.getElementById('llm-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                testLLM();
+            }
+        });
+
+        document.getElementById('tts-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                testTTS();
+            }
+        });
+    </script>
+</body>
+</html> 

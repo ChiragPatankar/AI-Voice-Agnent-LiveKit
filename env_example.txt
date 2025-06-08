@@ -1,0 +1,36 @@
+# Copy this file to .env and fill in your API keys
+
+# LiveKit Configuration (Required)
+LIVEKIT_API_KEY=your_livekit_api_key_here
+LIVEKIT_API_SECRET=your_livekit_api_secret_here
+LIVEKIT_URL=wss://your-livekit-server.livekit.cloud
+
+# AI Provider APIs (Fill based on your chosen providers)
+DEEPGRAM_API_KEY=your_deepgram_api_key_here
+GROQ_API_KEY=gsk_your_groq_api_key_here
+CARTESIA_API_KEY=your_cartesia_api_key_here
+
+# Optional: Alternative providers
+OPENAI_API_KEY=sk-your_openai_api_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+
+# Provider Configuration (Choose your preferred providers)
+STT_PROVIDER=deepgram
+LLM_PROVIDER=groq
+TTS_PROVIDER=cartesia
+
+# Performance Settings
+MAX_LATENCY_THRESHOLD=2.0
+GROQ_MODEL=llama-3.1-8b-instant
+OPENAI_MODEL=gpt-4o-mini
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+
+# Instructions:
+# 1. Copy this file to .env: cp env_example.txt .env
+# 2. Fill in your API keys (remove the _here suffixes)
+# 3. Get free API keys from:
+#    - LiveKit: https://console.livekit.io
+#    - Deepgram: https://console.deepgram.com  
+#    - Groq: https://console.groq.com
+#    - Cartesia: https://cartesia.ai
+# 4. Keep .env file secure and never commit it to git 
